@@ -103,6 +103,9 @@ public class ProjectService {
     public ProjectResponse removeMember(Long projectId, Long memberId) {
         Project project = getOrThrow(projectId);
         Member member = memberService.getOrThrow(memberId);
+        if (project.getMembers().size() <= 1) {
+            throw new BusinessException("O projeto deve ter no mínimo 1 membro.");
+        }
         project.getMembers().remove(member);
         return toResponse(projectRepository.save(project));
     }

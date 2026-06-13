@@ -219,4 +219,40 @@ class ProjectServiceTest {
 
         assertThat(project.getMembers()).contains(funcionario);
     }
+
+    @Test
+    void removeMember_lastMember_throwsBusinessException() {
+        project.getMembers().add(funcionario);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(memberService.getOrThrow(2L)).thenReturn(funcionario);
+
+        assertThatThrownBy(() -> projectService.removeMember(1L, 2L))
+                .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void removeMember_moreThanOneMember_removesMember() {
+        Member outro = new Member();
+        outro.setId(3L);
+        outro.setRole(MemberRole.FUNCIONARIO);
+        project.getMembers().add(funcionario);
+        project.getMembers().add(outro);
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(memberService.getOrThrow(2L)).thenReturn(funcionario);
+        when(projectRepository.save(any())).thenReturn(project);
+        when(projectMapper.toResponse(any())).thenReturn(mock(ProjectResponse.class));
+
+        projectService.removeMember(1L, 2L);
+
+        assertThat(project.getMembers()).doesNotContain(funcionario);
+    }
+
+    @Test
+    void getOrThrow_nonExistingId_throwsResourceNotFoundException() {
+        when(projectRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> projectService.getOrThrow(99L))
+                .isInstanceOf(com.portfolio.manager.exception.ResourceNotFoundException.class);
+    }
 }
