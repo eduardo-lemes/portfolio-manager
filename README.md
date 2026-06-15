@@ -4,7 +4,7 @@ Sistema de gerenciamento de portfólio de projetos desenvolvido com Spring Boot.
 
 ## Stack
 
-- Java 21
+- Java 17
 - Spring Boot 3.2.5
 - PostgreSQL 16
 - JPA + Hibernate
@@ -15,7 +15,7 @@ Sistema de gerenciamento de portfólio de projetos desenvolvido com Spring Boot.
 
 ## Pré-requisitos
 
-- Java 21+
+- Java 17+
 - Maven 3.9+
 - Docker + Docker Compose
 
@@ -64,11 +64,7 @@ Todos os endpoints utilizam HTTP Basic Auth.
 mvn test
 ```
 
-Cobertura com JaCoCo:
-```bash
-mvn test jacoco:report
-```
-Relatório gerado em `target/site/jacoco/index.html`.
+Relatório de cobertura JaCoCo gerado automaticamente em `target/site/jacoco/index.html`.
 
 ## Regras de negócio
 
