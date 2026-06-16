@@ -34,6 +34,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse create(ProjectRequest request) {
         Member manager = memberService.getOrThrow(request.managerId());
+        validateManager(manager);
         Project project = projectMapper.toEntity(request);
         project.setManager(manager);
         project.setStatus(ProjectStatus.EM_ANALISE);
@@ -44,6 +45,7 @@ public class ProjectService {
     public ProjectResponse update(Long id, ProjectRequest request) {
         Project project = getOrThrow(id);
         Member manager = memberService.getOrThrow(request.managerId());
+        validateManager(manager);
         projectMapper.updateFromRequest(request, project);
         project.setManager(manager);
         return toResponse(projectRepository.save(project));
@@ -63,7 +65,7 @@ public class ProjectService {
         Project project = getOrThrow(id);
         if (!project.getStatus().canTransitionTo(newStatus)) {
             throw new BusinessException(
-                    "Transição inválida: " + project.getStatus() + " → " + newStatus
+                    "Transição inválida: " + project.getStatus() + " para " + newStatus
             );
         }
         project.setStatus(newStatus);
@@ -143,5 +145,11 @@ public class ProjectService {
     public Project getOrThrow(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new com.portfolio.manager.exception.ResourceNotFoundException("Projeto não encontrado: " + id));
+    }
+
+    private void validateManager(Member manager) {
+        if (manager.getRole() != MemberRole.GERENTE) {
+            throw new BusinessException("O gerente do projeto deve ter a atribuição GERENTE.");
+        }
     }
 }

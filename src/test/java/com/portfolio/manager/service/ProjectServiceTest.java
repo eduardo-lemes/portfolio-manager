@@ -69,6 +69,18 @@ class ProjectServiceTest {
     }
 
     @Test
+    void create_managerRoleNotGerente_throwsBusinessException() {
+        ProjectRequest request = new ProjectRequest(
+                "Projeto", "Desc", LocalDate.now(), LocalDate.now().plusMonths(2),
+                null, new BigDecimal("50000"), funcionario.getId()
+        );
+        when(memberService.getOrThrow(funcionario.getId())).thenReturn(funcionario);
+
+        assertThatThrownBy(() -> projectService.create(request))
+                .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
     void calculateRisk_lowBudgetShortDeadline_returnsLow() {
         project.setTotalBudget(new BigDecimal("50000"));
         project.setExpectedEndDate(project.getStartDate().plusMonths(2));
