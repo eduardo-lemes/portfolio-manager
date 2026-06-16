@@ -7,6 +7,7 @@ import com.portfolio.manager.exception.BusinessException;
 import com.portfolio.manager.mapper.ProjectMapper;
 import com.portfolio.manager.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -38,7 +40,9 @@ public class ProjectService {
         Project project = projectMapper.toEntity(request);
         project.setManager(manager);
         project.setStatus(ProjectStatus.EM_ANALISE);
-        return toResponse(projectRepository.save(project));
+        Project saved = projectRepository.save(project);
+        log.info("Project created: id={}, name='{}', manager={}", saved.getId(), saved.getName(), manager.getId());
+        return toResponse(saved);
     }
 
     @Transactional
@@ -68,6 +72,7 @@ public class ProjectService {
                     "Transição inválida: " + project.getStatus() + " para " + newStatus
             );
         }
+        log.info("Project {} status changed: {} -> {}", id, project.getStatus(), newStatus);
         project.setStatus(newStatus);
         return toResponse(projectRepository.save(project));
     }
@@ -79,6 +84,7 @@ public class ProjectService {
         if (blocked.contains(project.getStatus())) {
             throw new BusinessException("Projeto com status '" + project.getStatus() + "' não pode ser excluído.");
         }
+        log.info("Project deleted: id={}", id);
         projectRepository.delete(project);
     }
 
@@ -98,6 +104,7 @@ public class ProjectService {
         }
 
         project.getMembers().add(member);
+        log.info("Member {} added to project {}", memberId, projectId);
         return toResponse(projectRepository.save(project));
     }
 
@@ -109,6 +116,7 @@ public class ProjectService {
             throw new BusinessException("O projeto deve ter no mínimo 1 membro.");
         }
         project.getMembers().remove(member);
+        log.info("Member {} removed from project {}", memberId, projectId);
         return toResponse(projectRepository.save(project));
     }
 
